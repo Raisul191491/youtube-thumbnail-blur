@@ -1,0 +1,43 @@
+/*
+ * Injected into youtube.com. Non-Tailwind, page-scoped.
+ * Blur is driven entirely by classes on <html>:
+ *   .ytb-on               master switch
+ *   .ytb-style-{blur,solid}    blur style
+ *   .ytb-reveal-{hover,click,never}  reveal mode
+ *   .ytb-off-<surface>    disable blur for one surface
+ *   --ytb-strength        blur radius
+ * Elements are tagged .ytb-blur + data-ytb-cat by the content script;
+ * .ytb-revealed marks click-revealed thumbnails.
+ * Rule order matters — later rules of equal specificity win.
+ */
+
+html.ytb-on .ytb-blur {
+  filter: blur(var(--ytb-strength, 14px));
+  transition: filter 0.15s ease;
+}
+
+/* Solid style: contrast(0) flattens to uniform gray, brightness dims it. */
+html.ytb-on.ytb-style-solid .ytb-blur {
+  filter: contrast(0%) brightness(0.35);
+}
+
+/* Surface toggled off. */
+html.ytb-on.ytb-off-home .ytb-blur[data-ytb-cat='home'],
+html.ytb-on.ytb-off-search .ytb-blur[data-ytb-cat='search'],
+html.ytb-on.ytb-off-watch .ytb-blur[data-ytb-cat='watch'],
+html.ytb-on.ytb-off-shorts .ytb-blur[data-ytb-cat='shorts'],
+html.ytb-on.ytb-off-channels .ytb-blur[data-ytb-cat='channels'],
+html.ytb-on.ytb-off-notifications .ytb-blur[data-ytb-cat='notifications'] {
+  filter: none;
+}
+
+/* Reveal paths. */
+html.ytb-on.ytb-reveal-hover .ytb-blur:hover,
+html.ytb-on.ytb-reveal-click .ytb-blur.ytb-revealed {
+  filter: none;
+}
+
+/* Click-to-reveal cursor hint. */
+html.ytb-on.ytb-reveal-click .ytb-blur:not(.ytb-revealed) {
+  cursor: pointer;
+}
